@@ -1,53 +1,40 @@
-# MiniSIEM
+# MiniSIEM  
 
 A lightweight log analysis tool inspired by Splunk.  
-Built for learning SIEM concepts while experimenting with Python.
+Built for learning SIEM concepts while experimenting with Python.  
 
-## Goals
-- Collect and store Windows event logs (simulated or real)
-- Query logs with basic search & filter
-- Detect simple anomalies (e.g., repeated failed logins)
-- Provide minimal visualization (counts, graphs)
+## Features  
+- Collects and stores simulated Windows event logs (JSON/CSV)  
+- Basic log search and filtering  
+- Alerting rules (e.g., repeated failed logins)  
+- Minimal visualization (counts, graphs)  
 
-## Why MiniSIEM?
-This project is designed as a learning exercise to:
-- Understand how SIEM systems like Splunk work under the hood
-- Practice Python, log parsing, and data analysis
-- Build a portfolio-ready project in cybersecurity
+## Why MiniSIEM?  
+This project is designed as a learning exercise to:  
+- Understand how SIEM systems like Splunk work under the hood  
+- Practice Python, log parsing, and data analysis  
+- Build a portfolio-ready project in cybersecurity  
 
-## Roadmap
-- [ ] Log collector (JSON/CSV)
-- [ ] Log search and filtering
-- [ ] Basic alerting rules
-- [ ] Visualization with matplotlib
+## Screenshot  
+Below is an example of MiniSIEM detecting failed logins using the log generator:  
 
----
+![Failed Login Detection](Images/FailedLoginDetection.png)  
 
-⚡ Work in Progress. Stay tuned!
+## Usage  
+1. Start the log generator:  
+   python log_generator.py  
 
-# MiniSIEM
+2. Run the MiniSIEM analyzer:  
+   python minisiem.py  
 
-A lightweight log analysis tool inspired by Splunk.  
-Built for learning SIEM concepts while experimenting with Python.
+3. Logs will be processed and alerts will be displayed in the terminal.  
 
-## Goals
-- Collect and store Windows event logs (simulated or real)
-- Query logs with basic search & filter
-- Detect simple anomalies (e.g., repeated failed logins)
-- Provide minimal visualization (counts, graphs)
+## Roadmap  
+- [x] Log generator (failed/successful login events)  
+- [x] Basic alerting rules (failed login detection)  
+- [ ] Expanded anomaly detection (brute force, unusual activity)  
+- [ ] Visualization with matplotlib  
 
-## Why MiniSIEM?
-This project is designed as a learning exercise to:
-- Understand how SIEM systems like Splunk work under the hood
-- Practice Python, log parsing, and data analysis
-- Build a portfolio-ready project in cybersecurity
+---  
 
-## Roadmap
-- [ ] Log collector (JSON/CSV)
-- [ ] Log search and filtering
-- [ ] Basic alerting rules
-- [ ] Visualization with matplotlib
-
----
-
-:zap: Work in Progress. Stay tuned!
+⚡ Work in Progress. Stay tuned!  

@@ -12,11 +12,12 @@ ips = ["192.168.1.10", "192.168.1.15", "10.0.0.5", "172.16.0.3"]
 files = ["/etc/passwd", "/var/log/syslog", "/home/alice/.ssh/id_rsa"]
 
 events = [
-    "LOGIN SUCCESS user={user} ip={ip}",
-    "LOGIN FAIL user={user} ip={ip}",
-    "FILE READ user={user} file={file}",
+    "LOGIN_SUCCESS user={user} ip={ip}",
+    "LOGIN_FAIL user={user} ip={ip}",   # <--- underscore version
+    "FILE_READ user={user} file={file}",
     "CONNECTION user={user} dst_ip={ip} port={port}",
 ]
+
 
 def generate_log():
     """Create a single fake log entry."""
@@ -30,33 +31,52 @@ def generate_log():
         event = random.choice(events).format(user=user, ip=ip, file=file, port=port)
 
         return f"{now} {event}"
-    
+
     except Exception as e:
         # If something breaks in generating the log, return an error log instead
         return f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} ERROR generating log: {e}"
+
+
+def generate_fail_streak(f, user, ip, count=3):
+    """Generate N consecutive failed logins for one user/IP."""
+    for i in range(count):
+        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        log_entry = f"{now} LOGIN_FAIL user={user} ip={ip}"
+        f.write(log_entry + "\n")
+        f.flush()
+        print(log_entry)
+        time.sleep(1)
+
 
 def main():
     print(f"Writing logs to {LOG_FILE}... Press Ctrl+C to stop.")
     try:
         with open(LOG_FILE, "a") as f:
             while True:
-                try:
-                    log_entry = generate_log()
-                    f.write(log_entry + "\n")
-                    f.flush()
-                    print(log_entry)
-                    time.sleep(1)
-                
-                except Exception as e:
-                    # Handles errors in writing to file or printing
-                    print(f"[ERROR] Failed to write log: {e}")
-                    time.sleep(1)  # wait before retrying
+                # Occasionally (10% chance), force a 3x fail streak
+                if random.random() < 0.1:
+                    user = random.choice(users)
+                    ip = random.choice(ips)
+                    generate_fail_streak(f, user, ip, count=3)
+                else:
+                    try:
+                        log_entry = generate_log()
+                        f.write(log_entry + "\n")
+                        f.flush()
+                        print(log_entry)
+                        time.sleep(1)
+
+                    except Exception as e:
+                        # Handles errors in writing to file or printing
+                        print(f"[ERROR] Failed to write log: {e}")
+                        time.sleep(1)  # wait before retrying
 
     except KeyboardInterrupt:
         print("\n[INFO] Program stopped by user. Goodbye!")
 
     except Exception as e:
         print(f"[FATAL] Could not open log file {LOG_FILE}: {e}")
+
 
 if __name__ == "__main__":
     main()
