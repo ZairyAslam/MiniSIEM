@@ -33,7 +33,6 @@ def generate_log():
         return f"{now} {event}"
 
     except Exception as e:
-        # If something breaks in generating the log, return an error log instead
         return f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} ERROR generating log: {e}"
 
 
@@ -53,7 +52,6 @@ def main():
     try:
         with open(LOG_FILE, "a") as f:
             while True:
-                # Occasionally (10% chance), force a 3x fail streak
                 if random.random() < 0.1:
                     user = random.choice(users)
                     ip = random.choice(ips)
@@ -65,15 +63,12 @@ def main():
                         f.flush()
                         print(log_entry)
                         time.sleep(1)
-
                     except Exception as e:
-                        # Handles errors in writing to file or printing
                         print(f"[ERROR] Failed to write log: {e}")
-                        time.sleep(1)  # wait before retrying
+                        time.sleep(1)
 
     except KeyboardInterrupt:
         print("\n[INFO] Program stopped by user. Goodbye!")
-
     except Exception as e:
         print(f"[FATAL] Could not open log file {LOG_FILE}: {e}")
 

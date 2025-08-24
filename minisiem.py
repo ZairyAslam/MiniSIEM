@@ -5,6 +5,17 @@ from datetime import datetime
 LOG_FILE = "logs/fake.log"
 failed_logins = {}  # store failed login attempts by user
 
+# Detection rules → categories + severity levels
+ALERT_RULES = {
+    "LOGIN_FAIL": {"category": "Authentication", "severity": "MEDIUM"},
+    "LOGIN_SUCCESS": {"category": "Authentication", "severity": "LOW"},
+    "FILE_READ": {"category": "Policy", "severity": "LOW"},
+    "CONNECTION": {"category": "Network", "severity": "MEDIUM"},
+}
+
+# Storage for summary counts
+alert_summary = {"HIGH": 0, "MEDIUM": 0, "LOW": 0}
+
 
 def parse_log_line(line):
     """
@@ -18,8 +29,10 @@ def parse_log_line(line):
     timestamp_str = parts[0] + " " + parts[1]  # combine date + time
     event_type = parts[2]
 
-    # convert timestamp string -> datetime object
-    timestamp = datetime.strptime(timestamp_str, "%Y-%m-%d %H:%M:%S")
+    try:
+        timestamp = datetime.strptime(timestamp_str, "%Y-%m-%d %H:%M:%S")
+    except ValueError:
+        return None
 
     data = {"timestamp": timestamp, "event_type": event_type}
 
@@ -44,12 +57,28 @@ def follow_log(file_path):
 
             event = parse_log_line(line)
             if event:
-                process_event(event)  # <--- handle detection here
+                process_event(event)
+
+
+def raise_alert(alert_type, event, details=""):
+    """Format and print alerts with category & severity"""
+    if alert_type not in ALERT_RULES:
+        print(f"[INFO] {details}")
+        return
+
+    rule = ALERT_RULES[alert_type]
+    category = rule["category"]
+    severity = rule["severity"]
+
+    print(f"[{severity}] ({category}) {alert_type} → {details}")
+    alert_summary[severity] += 1
 
 
 def process_event(event):
     """Detect suspicious patterns like multiple failed logins."""
-    if event["event_type"] == "LOGIN_FAIL":
+    event_type = event["event_type"]
+
+    if event_type == "LOGIN_FAIL":
         user = event.get("user", "UNKNOWN")
         timestamp = event["timestamp"]
 
@@ -65,8 +94,19 @@ def process_event(event):
 
         if len(failed_logins[user]) >= 3:
             print(f"🚨 ALERT: Multiple failed logins for user {user}")
+            alert_summary["HIGH"] += 1
+            return
+
+    # Normal event alerting
+    raise_alert(event_type, event, str(event))
 
 
 if __name__ == "__main__":
     print("[*] Starting MiniSIEM log reader...")
-    follow_log(LOG_FILE)
+    try:
+        follow_log(LOG_FILE)
+    except KeyboardInterrupt:
+        print("\n--- Alerts Summary ---")
+        for sev, count in alert_summary.items():
+            print(f"{sev}: {count}")
+        print("[INFO] Stopped by user.")
